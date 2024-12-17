@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Matching Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 30px;
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        .square {
+            width: 100px;
+            height: 100px;
+            background-color: #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            background-color: #ddd;
+        }
+
+        .flipped {
+            background-color: transparent;
+        }
+
+        .matched {
+            background-color: transparent;
+            pointer-events: none;
+        }
+
+        #message {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
+        #timer {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            background-color: #388E3C;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Color Matching Game</h1>
+    <p>Click on the squares to find matching pairs of colors! You have 30 seconds.</p>
+
+    <div id="game-board"></div>
+
+    <div id="message"></div>
+    <div id="timer">Time Left: 30s</div>
+    <button id="start-button" onclick="startGame()">Start New Game</button>
+
+    <script>
+        const colors = ['#FF6347', '#FF6347', '#4CAF50', '#4CAF50', '#2196F3', '#2196F3', '#FFC107', '#FFC107', '#9C27B0', '#9C27B0', '#E91E63', '#E91E63'];
+        let flippedSquares = [];
+        let matchedSquares = 0;
+        let timer;
+        let timeLeft = 30; // Set initial time to 30 seconds
+        let gameLocked = false; // Prevent further actions if the game is locked
+
+        // Shuffle the colors array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Initialize the game
+        function startGame() {
+            if (gameLocked) return; // Prevent starting a new game while the game is locked
+
+            flippedSquares = [];
+            matchedSquares = 0;
+            timeLeft = 30; // Reset timer to 30 seconds
+            gameLocked = false; // Unlock game to allow interaction
+            document.getElementById('message').innerHTML = '';
+            document.getElementById('timer').innerHTML = `Time Left: ${timeLeft}s`;
+            document.getElementById('start-button').disabled = true; // Disable the start button
+
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.innerHTML = ''; // Clear previous game
+
+            shuffle(colors); // Shuffle colors
+
+            // Create squares on the game board
+            for (let i = 0; i < 12; i++) {
+                const square = document.createElement('div');
+                square.classList.add('square', 'hidden');
+                square.setAttribute('data-index', i);
+                square.addEventListener('click', () => flipSquare(square, i));
+                gameBoard.appendChild(square);
+            }
+
+            startTimer();
+        }
+
+        // Start the countdown timer
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerHTML = `Time Left: ${timeLeft}s`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('message').innerHTML = 'Time is up! You lost!';
+                    lockGame();
+                }
+            }, 1000);
+        }
+
+        // Lock the game to prevent further actions when time is up or game is won
+        function lockGame() {
+            gameLocked = true; // Lock the game to prevent further interactions
+            document.querySelectorAll('.square').forEach(square => {
+                square.removeEventListener('click', flipSquare); // Remove click event listeners
+                square.style.cursor = 'not-allowed'; // Change cursor to indicate the game is locked
+            });
+            document.getElementById('start-button').disabled = false; // Enable the start button again
+
+            if (matchedSquares < 12) {
+                const unmatchedSquares = 12 - matchedSquares;  // Calculate the number of unmatched squares
+                document.getElementById('message').innerHTML = `Time is up! You were ${unmatchedSquares} square(s) away from winning. Better luck next time!`;
+            }
+        }
+
+        // Flip a square when clicked
+        function flipSquare(square, index) {
+            if (gameLocked || flippedSquares.length === 2 || square.classList.contains('flipped') || square.classList.contains('matched')) return;
+
+            square.style.backgroundColor = colors[index];
+            square.classList.add('flipped');
+            flippedSquares.push({ square, index });
+
+            if (flippedSquares.length === 2) {
+                checkMatch();
+            }
+        }
+
+        // Check if two flipped squares match
+        function checkMatch() {
+            const [first, second] = flippedSquares;
+            if (colors[first.index] === colors[second.index]) {
+                first.square.classList.add('matched');
+                second.square.classList.add('matched');
+                matchedSquares += 2;
+                if (matchedSquares === 12) {
+                    clearInterval(timer);
+                    document.getElementById('message').innerHTML = 'You Win! All pairs matched.';
+                    lockGame();
+                }
+            } else {
+                setTimeout(() => {
+                    first.square.style.backgroundColor = '#ddd';
+                    second.square.style.backgroundColor = '#ddd';
+                    first.square.classList.remove('flipped');
+                    second.square.classList.remove('flipped');
+                }, 1000);
+            }
+            flippedSquares = [];
+        }
+    </script>
+
+</body>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<footer>
+    <P>Click here to return to <a href="index.html">home</a>, <a href="about.html">resume</a>, or <a href="baseball.html">baseball</a> page.</P>
+</footer>
+</html>

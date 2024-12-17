@@ -1,0 +1,45 @@
+.subhead {
+    font-size: 18px;
+    color: gray; 
+    font-style: oblique;}
+body {
+    background-color: rgb(255, 255, 255);
+    font-family: Arial, sans-serif;
+    color: #000000;
+    margin: 0;
+    padding: 0;
+}
+
+#header {
+    background-color: #003366;
+    color: white;
+    padding: 20px;
+    text-align: right;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    font-size: 30px;
+    font-style: oblique;}
+
+#content {
+    padding: 20px;
+}
+
+#resources {
+    background-color: #e6e6e6;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+#footer {
+    background-color: #003366;
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
+
+.headerword {font-size: 20px;}
+
+.game {text-align: center;}
+
+
